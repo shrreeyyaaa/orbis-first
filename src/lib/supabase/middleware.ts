@@ -14,6 +14,14 @@ export async function updateSession(request: NextRequest) {
     // Demo mode: the session is just a cookie holding the demo user's id.
     user = request.cookies.get(MOCK_COOKIE)?.value ?? null;
   } else {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      // Fail with a readable message instead of an opaque middleware crash.
+      return new NextResponse(
+        "Orbis is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY " +
+          "in your hosting environment variables, then redeploy.",
+        { status: 500, headers: { "content-type": "text/plain; charset=utf-8" } },
+      );
+    }
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
